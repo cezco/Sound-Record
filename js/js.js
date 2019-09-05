@@ -15,7 +15,7 @@ function MP3Recorder(audioController, index, args)
 		sampleRate:     22050,//Input sample rate (samples per second)
 		bitRate:        32    //Output bit rate (9-128)
 	};
-	this.gBlob = null;
+	this.gBlob = null;        //Blob
 	this.gOverLimit = false;  //Overlimit
 	this.args = {};           //Argument from cunstructor
 	this.gPcmCt = 0;          //Total input bytes
@@ -66,6 +66,14 @@ function MP3Recorder(audioController, index, args)
 		_this.btnDownload = _this.gAudioController.find('.tool-download');
 		_this.btnDelete = _this.gAudioController.find('.tool-delete');
 		_this.txtStatus = _this.gAudioController.find('.tool-timer > i');
+		
+		if(!_this.btnRecord) _this.btnRecord = null;
+		if(!_this.btnPlay) _this.btnPlay = null;
+		if(!_this.btnStop) _this.btnStop = null;
+		if(!_this.btnUpload) _this.btnUpload = null;
+		if(!_this.btnDownload) _this.btnDownload = null;
+		if(!_this.btnDelete) _this.btnDelete = null;
+		if(!_this.txtStatus) _this.txtStatus = null;
 		
 		if(!audioRecorder.initialized)
 		{
@@ -146,135 +154,139 @@ function MP3Recorder(audioController, index, args)
 		}
 
 		_this.gAudioController.attr('data-index', _this.gIndex);
-		_this.btnRecord.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.stillPlaying();
-			}
-			else
-			{
-				if(audioRecorder.recorder[_this.gIndex].gIsRecording)
+		if(_this.btnRecord != null)
+		{
+			_this.btnRecord.on('click', function(e){
+				if($(this).hasClass('disabled'))
 				{
-					audioRecorder.recorder[_this.gIndex].onStop();
-					audioRecorder.recorder[_this.gIndex].gIsRecording = false;
-					$(this).removeClass('recording');
-					_this.btnPlay.removeClass('disabled');
-					_this.btnUpload.removeClass('disabled');
-					_this.btnDownload.removeClass('disabled');
-					_this.btnStop.removeClass('disabled');
+					_this.stillPlaying();
 				}
 				else
 				{
-					if(_this.isRecording())
+					if(audioRecorder.recorder[_this.gIndex].gIsRecording)
 					{
-						_this.stillRecording();
+						audioRecorder.recorder[_this.gIndex].onStop();
+						audioRecorder.recorder[_this.gIndex].gIsRecording = false;
+						_this.stateNotRecording();
 					}
 					else
 					{
-						if(!_this.gPowerOn)
+						if(_this.isRecording())
 						{
-							_this.onPower();
-							_this.btnDownload.addClass('disabled');
-							_this.btnUpload.addClass('disabled');
-							_this.btnPlay.addClass('disabled');
-							_this.btnRecord.addClass('recording');
-							_this.btnDelete.addClass('disabled');
+							_this.stillRecording();
 						}
 						else
 						{
-							if(_this.gOverLimit)
+							if(!_this.gPowerOn)
 							{
-								_this.overLimit();
+								_this.onPower();
+								_this.stateNotRecording();
 							}
 							else
 							{
-								audioRecorder.recorder[_this.gIndex].onRecord();
-								audioRecorder.recorder[_this.gIndex].gIsRecording = true;
-								$(this).addClass('recording');
-								_this.btnPlay.addClass('disabled');
+								if(_this.gOverLimit)
+								{
+									_this.overLimit();
+								}
+								else
+								{
+									audioRecorder.recorder[_this.gIndex].onRecord();
+									audioRecorder.recorder[_this.gIndex].gIsRecording = true;
+									_this.stateRecording();
+								}
 							}
 						}
 					}
 				}
-			}
-			e.preventDefault();
-		});
-		_this.btnDownload.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.nullAudio();
-			}
-			else
-			{
-				audioRecorder.recorder[_this.gIndex].downloadBlob();
-			}
-			e.preventDefault();
-		});
-		_this.btnUpload.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.nullAudio();
-			}
-			else
-			{
-				audioRecorder.recorder[_this.gIndex].uploadBlob();
-			}
-			e.preventDefault();
-		});
-		_this.btnStop.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.nullAudio();
-			}
-			else
-			{
-				audioRecorder.recorder[_this.gIndex].stopSound();
-			}
-			e.preventDefault();
-		});
-		_this.btnDelete.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.stillRecording();
-			}
-			else
-			{
-				_this.btnDelete.addClass('deleting');
-				audioRecorder.recorder[_this.gIndex].deleteSound();
-				setTimeout(function(){
-					_this.btnDelete.removeClass('deleting');
-				}, 200);
-			}
-			e.preventDefault();
-		});
-		_this.btnPlay.on('click', function(e){
-			if($(this).hasClass('disabled'))
-			{
-				_this.nullAudio();
-			}
-			else
-			{
-				if(_this.gDuration > 0)
+				e.preventDefault();
+			});
+		}
+		if(_this.btnDownload != null)
+		{
+			_this.btnDownload.on('click', function(e){
+				if($(this).hasClass('disabled'))
 				{
-					if($(this).hasClass('paused'))
+					_this.nullAudio();
+				}
+				else
+				{
+					audioRecorder.recorder[_this.gIndex].downloadBlob();
+				}
+				e.preventDefault();
+			});
+		}
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.on('click', function(e){
+				if($(this).hasClass('disabled'))
+				{
+					_this.nullAudio();
+				}
+				else
+				{
+					audioRecorder.recorder[_this.gIndex].uploadBlob();
+				}
+				e.preventDefault();
+			});
+		}
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.on('click', function(e){
+				if($(this).hasClass('disabled'))
+				{
+					_this.nullAudio();
+				}
+				else
+				{
+					audioRecorder.recorder[_this.gIndex].stopSound();
+				}
+				e.preventDefault();
+			});
+		}
+		if(_this.btnDelete != null)
+		{
+			_this.btnDelete.on('click', function(e){
+				if($(this).hasClass('disabled'))
+				{
+					_this.stillRecording();
+				}
+				else
+				{
+					_this.btnDelete.addClass('deleting');
+					audioRecorder.recorder[_this.gIndex].deleteSound();
+					setTimeout(function(){
+						_this.btnDelete.removeClass('deleting');
+					}, 200);
+				}
+				e.preventDefault();
+			});
+		}
+		if(_this.btnPlay != null)
+		{
+			_this.btnPlay.on('click', function(e){
+				if($(this).hasClass('disabled'))
+				{
+					_this.nullAudio();
+				}
+				else
+				{
+					if(_this.gDuration > 0)
 					{
-						audioRecorder.recorder[_this.gIndex].pauseSound();
-						_this.btnRecord.removeClass('disabled');
-						$(this).removeClass('paused');
-					}
-					else
-					{
-						audioRecorder.recorder[_this.gIndex].playSound();
-						_this.btnRecord.addClass('disabled');
-						$(this).addClass('paused');
+						if($(this).hasClass('paused'))
+						{
+							audioRecorder.recorder[_this.gIndex].pauseSound();
+							_this.stateNotPlaying();
+						}
+						else
+						{
+							audioRecorder.recorder[_this.gIndex].playSound();
+							_this.statePlaying();
+						}
 					}
 				}
-			}
-			e.preventDefault();
-		});
-		
-
-		
+				e.preventDefault();
+			});
+		}
 		if(_this.isRecording())
 		{
 			_this.stillRecording();
@@ -282,13 +294,100 @@ function MP3Recorder(audioController, index, args)
 		else
 		{
 			_this.onPower();
-			_this.btnDownload.addClass('disabled');
-			_this.btnUpload.addClass('disabled');
-			_this.btnPlay.addClass('disabled');
-			_this.btnRecord.addClass('recording');
-			_this.btnDelete.addClass('disabled');
+			_this.stateRecording();
 		}
 	};
+	this.statePlaying = function()
+	{
+		_this.btnRecord.addClass('disabled');
+		_this.btnPlay.addClass('paused');
+	}
+	this.stateNotPlaying = function()
+	{
+		_this.btnRecord.removeClass('disabled');
+		_this.btnPlay.removeClass('paused');
+	}
+	this.stateRecording = function()
+	{
+		if(_this.btnRecord != null)
+		{
+			_this.btnRecord.addClass('recording');
+		}
+		if(_this.btnPlay != null)
+		{
+			_this.btnPlay.addClass('disabled');
+		}
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.addClass('disabled');
+		}
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.addClass('disabled');
+		}
+		if(_this.btnDownload != null)
+		{
+			_this.btnDownload.addClass('disabled');
+		}
+		if(_this.btnDelete != null)
+		{
+			_this.btnDelete.addClass('disabled');
+		}
+	}
+	this.stateNotRecording = function()
+	{
+		if(_this.btnRecord != null)
+		{
+			_this.btnRecord.removeClass('disabled').removeClass('recording');
+		}
+		if(_this.btnPlay != null)
+		{
+			_this.btnPlay.removeClass('paused').removeClass('disabled');
+		}
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.removeClass('disabled');
+		}
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.removeClass('disabled');
+		}
+		if(_this.btnDownload != null)
+		{
+			_this.btnDownload.removeClass('disabled');
+		}
+		if(_this.btnDelete != null)
+		{
+			_this.btnDelete.removeClass('disabled');
+		}
+	}
+	this.stateNoAudio = function()
+	{
+		if(_this.btnRecord != null)
+		{
+			_this.btnRecord.removeClass('recording').removeClass('disable');
+		}
+		if(_this.btnPlay != null)
+		{
+			_this.btnPlay.addClass('disabled');
+		}
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.addClass('disabled');
+		}
+		if(_this.btnDownload != null)
+		{
+			_this.btnDownload.addClass('disabled');
+		}
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.addClass('disabled');
+		}
+		if(_this.btnDelete != null)
+		{
+			_this.btnDelete.addClass('disabled');
+		}
+	}
 	//Power button
 	this.onPower = function(btn) 
 	{
@@ -305,13 +404,13 @@ function MP3Recorder(audioController, index, args)
 	
 	this.PowerOn = function() 
 	{
-		_this.log("Powering up...");
+		//_this.log("Powering up...");
 		var caps  = { audio: true };
 		try 
 		{
 			if(!(_this.gAudioContext = new window.AudioContext())) 
 			{
-				_this.log("ERR: Unable to create AudioContext.");
+				//_this.log("ERR: Unable to create AudioContext.");
 			} 
 			else 
 			{
@@ -320,14 +419,14 @@ function MP3Recorder(audioController, index, args)
 		} 
 		catch(ex) 
 		{
-			_this.log("ERR: Unable to find any audio support.");
+			//_this.log("ERR: Unable to find any audio support.");
 			_this.gAudioContext  = null;
 		}
 		
 	};
 	this.onFail = function(ex) 
 	{
-		_this.log("ERR: getUserMedia failed: %s",ex);
+		//_this.log("ERR: getUserMedia failed: %s",ex);
 	};
 	
 	//Called when audio capture has been created.
@@ -335,7 +434,7 @@ function MP3Recorder(audioController, index, args)
 	{
 		if(!(_this.gAudioSrc = _this.gAudioContext.createMediaStreamSource(stream))) 
 		{
-			_this.log("ERR: Unable to create audio source.");
+			//_this.log("ERR: Unable to create audio source.");
 		} 
 		else 
 		{
@@ -350,14 +449,14 @@ function MP3Recorder(audioController, index, args)
 	  _this.gIsLame = true;
 	  if(!(_this.gEncoder = _this.Mp3Create())) 
 	  {
-		_this.log("ERR: Unable to create MP3 encoder.");
+		//_this.log("ERR: Unable to create MP3 encoder.");
 	  } 
 	  else 
 	  {
 		_this.gStrmMp3 = [];
 		_this.gPcmCt = 0;
 		_this.gMp3Ct = 0;
-		_this.log("Power ON.");
+		//_this.log("Power ON.");
 	  }
 	}
 	
@@ -365,15 +464,15 @@ function MP3Recorder(audioController, index, args)
 	this.Mp3Create = function() {
 	  if(!(_this.gLame = new lamejs())) 
 	  {
-		_this.log("ERR: Unable to create LAME object.");
+		//_this.log("ERR: Unable to create LAME object.");
 	  } 
 	  else if(!(_this.gEncoder = new _this.gLame.Mp3Encoder(_this.gCfg.chnlCt,_this.gCfg.sampleRate,_this.gCfg.bitRate))) 
 	  {
-		_this.log("ERR: Unable to create MP3 encoder.");
+		//_this.log("ERR: Unable to create MP3 encoder.");
 	  } 
 	  else 
 	  {
-		_this.log("MP3 encoder created.");
+		//_this.log("MP3 encoder created.");
 	  }
 	  return(_this.gEncoder);
 	}
@@ -381,81 +480,78 @@ function MP3Recorder(audioController, index, args)
 	//Shut everything down.
 	this.PowerOff = function() 
 	{
-	  _this.log("Power down...");
-	  if(_this.gIsRecording) 
-	  {
-		_this.log("ERR: PowerOff: You need to stop recording first.");
-	  } 
-	  else 
-	  {
-		_this.gEncoder = null;
-		_this.gLame = null;
-		_this.gNode = null;
-		_this.gAudioSrc = null;
-		_this.gAudioContext = null;
-		_this.log("Power OFF.");
-	  }
+		//_this.log("Power down...");
+		if(_this.gIsRecording) 
+		{
+			//_this.log("ERR: PowerOff: You need to stop recording first.");
+		} 
+		else 
+		{
+			_this.gEncoder = null;
+			_this.gLame = null;
+			_this.gNode = null;
+			_this.gAudioSrc = null;
+			_this.gAudioContext = null;
+			//_this.log("Power OFF.");
+		}
 	}
 	//Record button: Begin recording.
 	this.onRecord = function(btn) 
 	{
-	  var creator;
-	  _this.log("Start recording...");
-	  if(!_this.gAudioContext) 
-	  {
-		_this.log("ERR: No Audio source.");
-	  } 
-	  else if(!_this.gEncoder) 
-	  {
-		_this.log("ERR: No encoder.");
-	  } 
-	  else if(_this.gIsRecording) 
-	  {
-		_this.log("ERR: Still recording.");
-	  } 
-	  else 
-	  {
-		//Create the audio capture node.
-		if(!_this.gNode) 
+		var creator;
+		//_this.log("Start recording...");
+		if(!_this.gAudioContext) 
 		{
-		  if(!(creator = _this.gAudioSrc.context.createScriptProcessor || _this.gAudioSrc.createJavaScriptNode)) 
-		  {
-			_this.log("ERR: No processor creator?");
-		  } 
-		  else if(!(_this.gNode = creator.call(_this.gAudioSrc.context,_this.gCfg.bufSz,_this.gCfg.chnlCt,_this.gCfg.chnlCt))) 
-		  {
-			_this.log("ERR: Unable to create processor node.");
-		  }
-		}
-		
-		if(!_this.gNode) 
+			//_this.log("ERR: No Audio source.");
+		} 
+		else if(!_this.gEncoder) 
 		{
-			_this.log("ERR: onRecord: No processor node.");
+			//_this.log("ERR: No encoder.");
+		} 
+		else if(_this.gIsRecording) 
+		{
+			//_this.log("ERR: Still recording.");
 		} 
 		else 
 		{
-			//Set callbacks, connect the node between the audio source and destination.
-			_this.gNode.onaudioprocess  = _this.onAudioProcess;
-			_this.gAudioSrc.connect(_this.gNode);
-			_this.gNode.connect(_this.gAudioSrc.context.destination);
-			_this.gIsRecording  = true;
+			//Create the audio capture node.
+			if(!_this.gNode) 
+			{
+				if(!(creator = _this.gAudioSrc.context.createScriptProcessor || _this.gAudioSrc.createJavaScriptNode)) 
+				{
+					//_this.log("ERR: No processor creator?");
+				} 
+				else if(!(_this.gNode = creator.call(_this.gAudioSrc.context,_this.gCfg.bufSz,_this.gCfg.chnlCt,_this.gCfg.chnlCt))) 
+				{
+					//_this.log("ERR: Unable to create processor node.");
+				}
+			}
 			
-			_this.btnDownload.addClass('disabled');
-			_this.btnUpload.addClass('disabled');
-			_this.btnPlay.addClass('disabled');
-			_this.btnDelete.addClass('disabled');
-			
-			clearInterval(_this.gInterval);
-			_this.gStartTime = Date.now();
-			_this.showDuration();
-			_this.gInterval = setInterval(function(){
+			if(!_this.gNode) 
+			{
+				//_this.log("ERR: onRecord: No processor node.");
+			} 
+			else 
+			{
+				//Set callbacks, connect the node between the audio source and destination.
+				_this.gNode.onaudioprocess  = _this.onAudioProcess;
+				_this.gAudioSrc.connect(_this.gNode);
+				_this.gNode.connect(_this.gAudioSrc.context.destination);
+				_this.gIsRecording  = true;
+				
+				_this.stateRecording()
+				
+				clearInterval(_this.gInterval);
+				_this.gStartTime = Date.now();
+				_this.showDuration();
+				_this.gInterval = setInterval(function(){
 				_this.gDuration += _this.deltaTime();
 				_this.showDuration();
-			}, 1000);
-			
-			_this.log("RECORD");
+				}, 1000);
+				
+				//_this.log("RECORD");
+			}
 		}
-	  }
 	}
 	this.deltaTime = function()
 	{
@@ -466,41 +562,40 @@ function MP3Recorder(audioController, index, args)
 	}
 	
 	//Stop recording
-	this.onStop = function(btn) {
-	  _this.log("Stop recording...");
-	  if(!_this.gAudioContext) 
-	  {
-		_this.log("ERR: onStop: No audio.");
-	  } 
-	  else if(!_this.gAudioSrc) 
-	  {
-		_this.log("ERR: onStop: No audio source.");
-	  } 
-	  else if(!_this.gIsRecording) 
-	  {
-		_this.log("ERR: onStop: Not recording.");
-	  } 
-	  else 
-	  {
-		//Disconnect the node
-		_this.gNode.onaudioprocess = null;
-		_this.gAudioSrc.disconnect(_this.gNode);
-		_this.gNode.disconnect();
-		_this.gIsRecording = false;
-		//Flush the last mp3 buffer.
-		var mp3 = _this.gEncoder.flush();
-		if(mp3.length>0)
+	this.onStop = function() 
+	{
+		//_this.log("Stop recording...");
+		if(!_this.gAudioContext) 
 		{
-			_this.gStrmMp3.push(mp3);
+			//_this.log("ERR: onStop: No audio.");
+		} 
+		else if(!_this.gAudioSrc) 
+		{
+			//_this.log("ERR: onStop: No audio source.");
+		} 
+		else if(!_this.gIsRecording) 
+		{
+			//_this.log("ERR: onStop: Not recording.");
+		} 
+		else 
+		{
+			//Disconnect the node
+			_this.gNode.onaudioprocess = null;
+			_this.gAudioSrc.disconnect(_this.gNode);
+			_this.gNode.disconnect();
+			_this.gIsRecording = false;
+			//Flush the last mp3 buffer.
+			var mp3 = _this.gEncoder.flush();
+			if(mp3.length>0)
+			{
+				_this.gStrmMp3.push(mp3);
+			}
+			//Present the mp3 stream on the page.
+			_this.saveAudio();
+			_this.recordEnded();
+			clearInterval(_this.gInterval);
+			//_this.log("STOP");
 		}
-		//Present the mp3 stream on the page.
-		
-		_this.saveAudio();
-		_this.recordEnded();
-		clearInterval(_this.gInterval);
-		
-		_this.log("STOP");
-	  }
 	}
 	
 	//Process a single audio buffer.
@@ -553,28 +648,30 @@ function MP3Recorder(audioController, index, args)
 	}
 	this.deleteSound = function()
 	{
+		_this.gAudio = new Audio();
+		_this.gBlob = null;
 		_this.gStrmMp3 = [];
 		_this.gPcmCt = 0;
 		_this.gMp3Ct = 0;
 		_this.gDuration = 0;
-		_this.gAudio = new Audio();
 		_this.showDuration();
+		_this.stateNoAudio();
 	}
 	
 	//Convert floating point to 16bit signed int.
 	this.convertFloatToInt16 = function(inFloat) 
 	{
-	  var sampleCt = inFloat.length;
-	  var outInt16 = new Int16Array(sampleCt);
-	  for(var n1=0;n1<sampleCt;n1++) 
-	  {
-		//This is where I can apply waveform modifiers.
-		var sample16 = 0x8000*inFloat[n1];
-		//Clamp value to avoid integer overflow, which causes audible pops and clicks.
-		sample16 = (sample16 < -32767) ? -32767 : (sample16 > 32767) ? 32767 : sample16;
-		outInt16[n1] = sample16;
-	  }
-	  return(outInt16);
+		var sampleCt = inFloat.length;
+		var outInt16 = new Int16Array(sampleCt);
+		for(var n1=0;n1<sampleCt;n1++) 
+		{
+			//This is where I can apply waveform modifiers.
+			var sample16 = 0x8000*inFloat[n1];
+			//Clamp value to avoid integer overflow, which causes audible pops and clicks.
+			sample16 = (sample16 < -32767) ? -32767 : (sample16 > 32767) ? 32767 : sample16;
+			outInt16[n1] = sample16;
+		}
+		return(outInt16);
 	}
 	this.saveAudio = function()
 	{
@@ -598,21 +695,20 @@ function MP3Recorder(audioController, index, args)
 	};
 	this.recordEnded = function()
 	{
-		_this.btnPlay.removeClass('paused').removeClass('disabled');
-		_this.btnRecord.removeClass('disabled').removeClass('recording');
-		_this.btnDelete.removeClass('disabled');
-		_this.btnUpload.removeClass('disabled');
-		_this.btnDownload.removeClass('disabled');
 		_this.calculateRealDuration();
 	};
 	this.calculateRealDuration = function()
 	{
-		var url = URL.createObjectURL(_this.gBlob);
-        var preview = new Audio();
-        preview.src = url;
-		setTimeout(function(){
-			_this.gDuration = parseInt(preview.duration * 1000);
-		}, 200);
+		if(_this.gAudio.duration > 0)
+		{
+			_this.gDuration = parseInt(_this.gAudio.duration * 1000);
+		}
+		else
+		{
+			setTimeout(function(){
+				_this.gDuration = parseInt(_this.gAudio.duration * 1000);
+			}, 500);
+		}
 	}
 	this.isRecording = function()
 	{
@@ -640,21 +736,33 @@ function MP3Recorder(audioController, index, args)
 	};
 	this.beforeUpload = function()
 	{
-		_this.btnUpload.addClass('uploading');
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.addClass('uploading');
+		}
 	};
 	this.afterUpload = function()
 	{
-		_this.btnUpload.removeClass('uploading');
+		if(_this.btnUpload != null)
+		{
+			_this.btnUpload.removeClass('uploading');
+		}
 	};
 	this.playSound = function()
 	{
 		_this.gAudio.play();
-		_this.btnStop.removeClass('disabled');
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.removeClass('disabled');
+		}
 	};
 	this.pauseSound = function()
 	{
 		_this.gAudio.pause();
-		_this.btnStop.removeClass('disabled');
+		if(_this.btnStop != null)
+		{
+			_this.btnStop.removeClass('disabled');
+		}
 	};
 	this.stopSound = function()
 	{
