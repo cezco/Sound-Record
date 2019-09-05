@@ -2,7 +2,7 @@
 <head>
     <title>MP3 Encoder</title>
     <link rel="stylesheet" type="text/css" href="css/css.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+    <script src="js/lame.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script type="text/javascript" src="js/js.js"></script>
 </head>
