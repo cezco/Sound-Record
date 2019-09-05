@@ -139,9 +139,9 @@ function MP3Recorder(audioController, index, args)
 		}
 		if(typeof args.log == 'function')
 		{
-			_this.log = function()
+			_this.log = function(text)
 			{
-				args.log();
+				args.log(text);
 			}
 		}
 
