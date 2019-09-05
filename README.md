@@ -1,2 +1,2 @@
 # SoundRecorder
-Record multiple sound an one web page using JavaScript
+Record multiple sound on one web page using JavaScript
