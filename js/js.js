@@ -86,7 +86,6 @@ function MP3Recorder(audioController, index, args)
 				|| navigator.msGetUserMedia
 				|| MediaDevices.getUserMedia;
 			audioRecorder.initialized = true;
-
 		}
 
 		
