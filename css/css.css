@@ -1,0 +1,239 @@
+@charset "utf-8";
+.audio-recorder{
+	background-color:#FFFFFF;
+	border:1px solid #DDDDDD;
+	margin:5px 0px;
+	padding:5px 0px;
+}
+.audio-status{
+	font-size:10px;
+	text-align:center;
+	font-family:Tahoma, Geneva, sans-serif;
+}
+.audio-recorder .audio-tool{
+	display:inline-block;
+	cursor:pointer;
+	width: 20px;
+	height: 20px;
+}
+.audio-recorder .audio-tool span{
+	display:inline-block;
+	width:20px;
+	height:20px;
+	position:relative;
+}
+.audio-recorder .tool-record span{
+	border-radius:50%;
+	background-color: #ae0000;
+}
+.audio-recorder .tool-stop span::before{
+	content:"";
+	position:absolute;
+	width:18px;
+	height:18px;
+	left:1px;
+	top:1px;
+	background-color:#222222;
+}
+.audio-recorder .tool-play span{
+	border-color: transparent transparent transparent #202020;
+}
+
+.audio-recorder .tool-record.recording span{
+	animation-name: pulse;
+	animation-duration: 1.5s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+
+.audio-recorder .tool-play span
+{
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+  width: 0;
+  height: 20px;
+  border-color: transparent transparent transparent #202020;
+  transition: 100ms all ease;
+  cursor: pointer;
+  border-style: solid;
+  border-width: 10px 0 10px 17px;
+}
+
+.audio-recorder .tool-play.paused span{
+    border-style: double;
+    border-width: 0px 0 0px 17px;
+}
+
+.audio-recorder .tool-play:hover span{
+    border-color: transparent transparent transparent #404040;
+}
+
+.audio-recorder .tool-upload span::before
+{
+	border:0;
+	left:4px;
+	position:absolute;
+	content:"";
+	width: 10px; 
+	height: 12px;
+	background-color:#222222;
+	bottom:2px;
+}
+.audio-recorder .tool-upload span::after
+{
+	position:absolute;
+	left:0;
+	top:2px;
+	content:"";
+	width: 0; 
+	height: 0; 
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-bottom: 9px solid #222222;
+}
+
+.audio-recorder .tool-upload.uploading span::before{
+	height: 8px;
+	bottom:0px;
+	animation-name: uploading1;
+	animation-duration: 0.6s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+.audio-recorder .tool-upload.uploading span::after{
+	top:4px;
+	animation-name: uploading2;
+	animation-duration: 0.6s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+
+.audio-recorder .tool-download span::before
+{
+	border:0;
+	left:4px;
+	position:absolute;
+	content:"";
+	width: 10px; 
+	height: 12px;
+	background-color:#222222;
+	top:2px;
+}
+.audio-recorder .tool-download span::after
+{
+	position:absolute;
+	left:0;
+	bottom:2px;
+	content:"";
+	width: 0; 
+	height: 0; 
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-top: 9px solid #222222;
+}
+.audio-recorder .tool-delete span{
+}
+.audio-recorder .tool-delete span::before{
+	content:"";
+	position:absolute;
+	width:2px;
+	height:20px;
+	background-color:#222222;
+	transform:rotate(45deg);
+	left:9px;
+	top:0;
+}
+.audio-recorder .tool-delete span::after{
+	content:"";
+	position:absolute;
+	width:20px;
+	height:2px;
+	background-color:#222222;
+	transform:rotate(45deg);
+	left:0;
+	top:9px;
+}
+.audio-recorder .tool-delete.deleting span::before, .audio-recorder .tool-delete.deleting span::after{
+	animation-name: deleting1;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+.audio-recorder .tool-timer i {
+    font-style: normal;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    padding-top: 3px;
+    display: inline-block;
+    min-width: 40px;
+}
+@keyframes deleting1{
+	0%{
+		transform:rotate(45deg);
+	}
+	25%{
+		transform:rotate(135deg);
+	}
+	50%{
+		transform:rotate(225deg);
+	}
+	75%{
+		transform:rotate(315deg);
+	}
+	100%{
+		transform:rotate(405deg);
+	}
+}
+@keyframes deleting2{
+	0%{
+		transform:rotate(-45deg);
+	}
+	25%{
+		transform:rotate(45deg);
+	}
+	50%{
+		transform:rotate(135deg);
+	}
+	75%{
+		transform:rotate(225deg);
+	}
+	100%{
+		transform:rotate(315deg);
+	}
+}
+
+
+@keyframes uploading1{
+	0%{
+		bottom:0px;
+	}
+	65%{
+		bottom:2px;
+	}
+	90%{
+		bottom:4px;
+	}
+}
+@keyframes uploading2{
+	0%{
+		top:4px;
+	}
+	65%{
+		top:2px;
+	}
+	90%{
+		top:0px;
+	}
+}
+@keyframes pulse{
+	0%{
+		box-shadow: 0px 0px 5px 0px rgba(174,0,0,.3);
+	}
+	65%{
+		box-shadow: 0px 0px 5px 13px rgba(174,0,0,.3);
+	}
+	90%{
+		box-shadow: 0px 0px 5px 13px rgba(174,0,0,0);
+	}
+}
