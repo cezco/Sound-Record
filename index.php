@@ -1,25 +1,26 @@
 <html>
 <head>
-    <title>MP3 Encoder</title>
+    <title>MP3 Recorder</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="css/css.css">
-    <script src="js/lame.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/lame.js"></script>
 	<script type="text/javascript" src="js/js.js"></script>
 </head>
 
 <body>
 <style type="text/css">
 .audio-tool-wrapper {
-  display: flex;
-  justify-content: center;
+	display:flex;
+	justify-content:center;
 }
 
 .audio-tool-wrapper > span {
-  width: 100px;
-  margin: 8px;
-  text-align: center;
-  position:relative;
-  display:block;
+	width:100px;
+	margin:8px;
+	text-align:center;
+	position:relative;
+	display:block;
 }
 </style>
 
@@ -105,7 +106,7 @@ $(document).ready(function(e) {
 				},
 				nullAudio:function()
 				{
-					alert('Belum ada audio cuy! Selesaikan rekaman dulu...');
+					alert('Belum ada audio cuyy! Selesaikan rekaman dulu...');
 				},
 				stillRecording:function()
 				{
