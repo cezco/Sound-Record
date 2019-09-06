@@ -698,15 +698,24 @@ function MP3Recorder(audioController, index, args)
 	};
 	this.calculateRealDuration = function()
 	{
+		var realDuration = 0;
 		if(_this.gAudio.duration > 0)
 		{
-			_this.gDuration = parseInt(_this.gAudio.duration * 1000);
+			realDuration = parseInt(_this.gAudio.duration * 1000);
 		}
 		else
 		{
 			setTimeout(function(){
-				_this.gDuration = parseInt(_this.gAudio.duration * 1000);
+				realDuration = parseInt(_this.gAudio.duration * 1000);
+				if(realDuration > _this.gDuration)
+				{
+					_this.gDuration = realDuration;
+				}
 			}, 500);
+		}
+		if(realDuration > _this.gDuration)
+		{
+			_this.gDuration = realDuration;
 		}
 	}
 	this.isRecording = function()
