@@ -1,6 +1,6 @@
-function MP3Recorder(audioController, index, args)
+function MP3Recorder(audioController, index, action, args)
 {
-	this.gAudio = new Audio();
+	this.gAudio = new Audio();	
 	this.gAudioContext = null;//Audio context
 	this.gAudioSrc = null;    //Audio source
 	this.gNode = null;        //The audio processor node
@@ -33,11 +33,12 @@ function MP3Recorder(audioController, index, args)
 	this.btnDownload = null;
 	this.btnDelete = null;
 	this.txtStatus = null;
+	this.lastSource = action;
 	
-	this.uploadSound = function(blob, duration, questionID, audioIndex)
+	this.uploadSound = function(audio, duration, index, questionID, audioIndex)
 	{
 	};
-	this.downloadSound = function(blob, duration, questionID, audioIndex)
+	this.downloadSound = function(audio, duration, index, questionID, audioIndex)
 	{
 	};
 	this.stillRecording = function()
@@ -56,7 +57,7 @@ function MP3Recorder(audioController, index, args)
 	{
 	};
 
-	this.init = function(audioController, index, args)
+	this.init = function(audioController, index, action, args)
 	{
 		_this.gIndex = index;
 		_this.btnRecord = _this.gAudioController.find('.tool-record');
@@ -104,16 +105,16 @@ function MP3Recorder(audioController, index, args)
 
 		if(typeof args.uploadSound == 'function')
 		{
-			_this.uploadSound = function(blob, duration, questionID, audioIndex)
+			_this.uploadSound = function(audio, duration, index, questionID, audioIndex)
 			{
-				args.uploadSound(blob, duration, questionID, audioIndex);
+				args.uploadSound(audio, duration, index, questionID, audioIndex);
 			}
 		}
 		if(typeof args.downloadSound == 'function')
 		{
-			_this.downloadSound = function(blob, duration, questionID, audioIndex)
+			_this.downloadSound = function(audio, duration, index, questionID, audioIndex)
 			{
-				args.downloadSound(blob, duration, questionID, audioIndex);
+				args.downloadSound(audio, duration, index, questionID, audioIndex);
 			}
 		}
 		if(typeof args.stillRecording == 'function')
@@ -209,7 +210,7 @@ function MP3Recorder(audioController, index, args)
 				}
 				else
 				{
-					audioRecorder.recorder[_this.gIndex].downloadBlob();
+					audioRecorder.recorder[_this.gIndex].downloadData();
 				}
 				e.preventDefault();
 			});
@@ -223,7 +224,7 @@ function MP3Recorder(audioController, index, args)
 				}
 				else
 				{
-					audioRecorder.recorder[_this.gIndex].uploadBlob();
+					audioRecorder.recorder[_this.gIndex].uploadData();
 				}
 				e.preventDefault();
 			});
@@ -286,16 +287,93 @@ function MP3Recorder(audioController, index, args)
 				e.preventDefault();
 			});
 		}
-		if(_this.isRecording())
+		if(_this.gAudioController.find('input[type="file"]').length)
 		{
-			_this.stillRecording();
+			_this.gAudioController.find('input[type="file"]').remove();
 		}
-		else
+		
+		// remove event trigger from browse
+		var browse = _this.gAudioController.find('.tool-browse');
+		browse.on('click', function(e)
 		{
-			_this.onPower();
-			_this.stateRecording();
+			if(_this.isRecording())
+			{
+				_this.onStop();
+			}
+			_this.stateNotRecording();
+			_this.gDuration = 0;
+			_this.gAudioController.find('input[type="file"]').click();
+		});
+		
+		var fileInput = $('<input />');
+		fileInput.attr({'type':'file', 'accept':'audio/mp3,audio/ogg','capture':'capture'}).css({'position':'absolute', 'left':'-100000px', 'top':'-100000px'}).on('change', function(e){
+			if(e.target.files)
+			{
+				var file = e.target.files[0];
+				var reader = new FileReader();	  
+				if(file)
+				{
+					_this.lastSource = 'browse';
+					var reader = new FileReader();
+					reader.onload = function (e2) 
+					{
+						audioRecorder.recorder[_this.gIndex].gAudio.onloadedmetadata = function(e3)
+						{
+							if(!isNaN(audioRecorder.recorder[_this.gIndex].gAudio.duration))
+							{
+								_this.gDuration = audioRecorder.recorder[_this.gIndex].gAudio.duration * 1000;
+								_this.showDuration();
+							}
+							else
+							{
+								setTimeout(function()
+								{
+									if(!isNaN(audioRecorder.recorder[_this.gIndex].gAudio.duration))
+									{
+										_this.gDuration = audioRecorder.recorder[_this.gIndex].gAudio.duration * 1000;
+										_this.showDuration();
+									}
+								}, 1000);
+							}
+						};
+						audioRecorder.recorder[_this.gIndex].gAudio.src = e2.target.result;
+					};
+					reader.readAsDataURL(file);
+				}
+			}				
+		});
+		_this.gAudioController.append(fileInput);
+
+		if(action == 'record')
+		{
+			if(_this.isRecording())
+			{
+				_this.stillRecording();
+			}
+			else
+			{
+				_this.onPower();
+				_this.stateRecording();
+			}
+		}
+		else if(action == 'browse')
+		{
+			_this.gAudioController.find('input[type="file"]').click();
 		}
 	};
+	this.convertDataURIToBinary = function(dataURI){
+		var BASE64_MARKER = ';base64,';
+		var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+		var base64 = dataURI.substring(base64Index);
+		var raw = window.atob(base64);
+		var rawLength = raw.length;
+		var array = new Uint8Array(new ArrayBuffer(rawLength));
+		
+		for(i = 0; i < rawLength; i++) {
+		array[i] = raw.charCodeAt(i);
+		}
+		return array;
+	}
 	this.statePlaying = function()
 	{
 		_this.btnRecord.addClass('disabled');
@@ -533,6 +611,11 @@ function MP3Recorder(audioController, index, args)
 			else 
 			{
 				//Set callbacks, connect the node between the audio source and destination.
+				if(_this.lastSource == 'browse')
+				{
+					_this.gDuration = 0;
+				}
+				_this.lastSource = 'record';
 				_this.gNode.onaudioprocess  = _this.onAudioProcess;
 				_this.gAudioSrc.connect(_this.gNode);
 				_this.gNode.connect(_this.gAudioSrc.context.destination);
@@ -544,11 +627,10 @@ function MP3Recorder(audioController, index, args)
 				_this.gStartTime = Date.now();
 				_this.showDuration();
 				_this.gInterval = setInterval(function(){
-				_this.gDuration += _this.deltaTime();
-				_this.showDuration();
-				}, 1000);
+					_this.gDuration += _this.deltaTime();
+					_this.showDuration();
+				}, 500);
 				
-				//_this.log("RECORD");
 			}
 		}
 	}
@@ -677,10 +759,18 @@ function MP3Recorder(audioController, index, args)
 		_this.gBlob = new Blob(_this.gStrmMp3, {type: 'audio/mp3'});
 		var reader = new FileReader();
 		reader.readAsDataURL(_this.gBlob); 
-		reader.onloadend = function() 
+		reader.onloadend = function(e) 
 		{
 			_this.gAudio = new Audio();
 			_this.gAudio.src = reader.result;
+			_this.gAudio.onloadedmetadata = function(e2)
+			{
+				if(_this.gAudio.duration > _this.gDuration)
+				{
+					_this.gDuration = _this.gAudio.duration * 1000;
+				}
+			};
+			
 			_this.gAudio.onended = function(){
 				_this.playEnded();
 			}
@@ -694,30 +784,7 @@ function MP3Recorder(audioController, index, args)
 	};
 	this.recordEnded = function()
 	{
-		_this.calculateRealDuration();
 	};
-	this.calculateRealDuration = function()
-	{
-		var realDuration = 0;
-		if(_this.gAudio.duration > 0)
-		{
-			realDuration = parseInt(_this.gAudio.duration * 1000);
-		}
-		else
-		{
-			setTimeout(function(){
-				realDuration = parseInt(_this.gAudio.duration * 1000);
-				if(realDuration > _this.gDuration)
-				{
-					_this.gDuration = realDuration;
-				}
-			}, 500);
-		}
-		if(realDuration > _this.gDuration)
-		{
-			_this.gDuration = realDuration;
-		}
-	}
 	this.isRecording = function()
 	{
 		var i, len = audioRecorder.recorder.length;
@@ -730,17 +797,17 @@ function MP3Recorder(audioController, index, args)
 		}
 		return false;
 	};
-	this.downloadBlob = function()
+	this.downloadData = function()
 	{
 		var questionID = _this.gAudioController.attr('data-question-id');
 		var audioIndex = _this.gAudioController.attr('data-audio-index');
-		_this.downloadSound(_this.gBlob, _this.gDuration, questionID, audioIndex);         
+		_this.downloadSound(_this.gAudio, _this.gDuration, _this.gIndex, questionID, audioIndex);         
 	};
-	this.uploadBlob = function()
+	this.uploadData = function()
 	{
 		var questionID = _this.gAudioController.attr('data-question-id');
 		var audioIndex = _this.gAudioController.attr('data-audio-index');
-		_this.uploadSound(_this.gBlob, _this.gDuration, questionID, audioIndex);         
+		_this.uploadSound(_this.gAudio, _this.gDuration, _this.gIndex, questionID, audioIndex);         
 	};
 	this.beforeUpload = function()
 	{
@@ -780,6 +847,10 @@ function MP3Recorder(audioController, index, args)
 	};
 
 	var _this = this;
-	this.init(audioController, index, args);
+	if(action == '')
+	{
+		action = 'record';
+	}
+	this.init(audioController, index, action, args);
 
 }
