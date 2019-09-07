@@ -22,6 +22,34 @@
 	height:20px;
 	position:relative;
 }
+.audio-recorder .tool-browse span::before{
+	content:"";
+	position:absolute;
+	width:17px;
+	height:13px;
+	left:-1px;
+	top:5px;
+	background-color:#FFFFFF;
+	border:1px solid #888888;
+	transform:skew(15deg);
+	box-sizing:border-box;
+	border-top-left-radius:3px;
+	border-top-right-radius:3px;
+}
+.audio-recorder .tool-browse span::after{
+	content:"";
+	position:absolute;
+	width:17px;
+	height:14px;
+	left:3px;
+	top:4px;
+	background-color:#555555;
+	transform:skew(-15deg);
+	box-sizing:border-box;
+	border-top-left-radius:3px;
+	border-top-right-radius:3px;
+}
+
 .audio-recorder .tool-record span{
 	border-radius:50%;
 	background-color: #ae0000;
@@ -76,7 +104,7 @@
 	position:absolute;
 	content:"";
 	width: 10px; 
-	height: 12px;
+	height: 10px;
 	background-color:#222222;
 	bottom:2px;
 }
@@ -116,7 +144,7 @@
 	position:absolute;
 	content:"";
 	width: 10px; 
-	height: 12px;
+	height: 10px;
 	background-color:#222222;
 	top:2px;
 }
